@@ -60,13 +60,23 @@ class PlaylistMux:
             self.q.sourced = False
             self.pl.sourced = True
 
+    def _should_play_from_playlist(self, keep_songs, q_disable):
+        """Checks whether the next song should come from the playlist instead of
+        the queue. This is the case if the queue is empty or disabled, or if the queue
+        keeps its songs and is not the current source.
+        """
+
+        if self.q.is_empty() or q_disable:
+            return True
+        return keep_songs and not self.q.sourced
+
     def next(self):
         """Switch to the next song"""
 
         keep_songs = config.getboolean("memory", "queue_keep_songs", False)
         q_disable = config.getboolean("memory", "queue_disable", False)
 
-        if self.q.is_empty() or q_disable or (keep_songs and not self.q.sourced):
+        if self._should_play_from_playlist(keep_songs, q_disable):
             self.pl.next()
             if q_disable and self.q.sourced:
                 # The go_to is to make sure the playlist begins playing
@@ -82,7 +92,7 @@ class PlaylistMux:
         keep_songs = config.getboolean("memory", "queue_keep_songs", False)
         q_disable = config.getboolean("memory", "queue_disable", False)
 
-        if self.q.is_empty() or q_disable or (keep_songs and not self.q.sourced):
+        if self._should_play_from_playlist(keep_songs, q_disable):
             self.pl.next_ended()
             if q_disable and self.q.sourced:
                 self.go_to(self.pl.current)
