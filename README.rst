@@ -60,7 +60,7 @@ check out the
 For how to use the apps, consult the `user guide <https://quodlibet.readthedocs.io/en/latest/guide/>`_.
 
 
-Building and Testing
+Building and Testing Extra Information
 --------------------
 
 Requires Python 3.10+ and `Poetry <https://python-poetry.org/>`_ 2.
