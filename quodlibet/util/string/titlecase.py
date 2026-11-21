@@ -62,12 +62,10 @@ def utitle(string):
         s = string[i]
         prev = string[i - 1]
         # Special case apostrophe in the middle of a word.
+        is_apostrophe_in_word = s == "'" and prev.isalpha()
         # Also, extra case to deal with Irish-style names (eg O'Conner)
-        if (
-            "'" == s
-            and string[i - 1].isalpha()
-            and not (i > 1 and string[i - 2].isspace() and prev.lower() == "o")
-        ):
+        is_irish_name_prefix = i > 1 and string[i - 2].isspace() and prev.lower() == "o"
+        if is_apostrophe_in_word and not is_irish_name_prefix:
             cap = False
         elif iswbound(s):
             cap = True
