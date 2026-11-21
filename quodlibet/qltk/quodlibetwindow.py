@@ -1241,6 +1241,17 @@ class QuodLibetWindow(Window, PersistentWindowMixin, AppWindow):
                 title = song.comma(tag) + " - " + title
         self.set_title(title)
 
+    def _should_jump_to(self, song_list, player, song):
+        """
+        Returns True if song_list should scroll to the newly started song.
+        Requires the "jump" setting and song_list to be the active source.
+        """
+
+        is_new_song = song and player.song is song
+        if not is_new_song or song_list._activated:
+            return False
+        return config.getboolean("settings", "jump") and song_list.sourced
+
     def __song_started(self, player, song):
         self.__update_title(player)
 
@@ -1254,22 +1265,10 @@ class QuodLibetWindow(Window, PersistentWindowMixin, AppWindow):
         ]:
             self.ui.get_widget("/Menu/" + wid).set_sensitive(bool(song))
 
-        # don't jump on stream changes (player.info != player.song)
-        main_should_jump = (
-            song
-            and player.song is song
-            and not self.songlist._activated
-            and config.getboolean("settings", "jump")
-            and self.songlist.sourced
-        )
-        queue_should_jump = (
-            song
-            and player.song is song
-            and not self.qexpander.queue._activated
-            and config.getboolean("settings", "jump")
-            and self.qexpander.queue.sourced
-            and config.getboolean("memory", "queue_keep_songs")
-        )
+        main_should_jump = self._should_jump_to(self.songlist, player, song)
+        queue_should_jump = self._should_jump_to(
+            self.qexpander.queue, player, song
+        ) and config.getboolean("memory", "queue_keep_songs")
         if main_should_jump:
             self.__jump_to_current(False, self.songlist)
         elif queue_should_jump:
